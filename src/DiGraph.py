@@ -13,8 +13,24 @@ class GeoLocation(object):
             self.y = 0
             self.z = 0
 
+    def __eq__(self, other):
+        if other is None:
+            return False
+        if type(other) is not type(self):
+            return False
+        if other.x != self.x:
+            return False
+        if other.y != self.y:
+            return False
+        if other.z != self.z:
+            return False
+        return True
+
     def __repr__(self):
         return "("+str(self.x) + ", "+str(self.y) + ", "+str(self.z)+")"
+
+    def to_string(self):
+        return str(self.x) + ","+str(self.y) + ","+str(self.z)
 
 class NodeData(object):
     def __init__(self, node_id: int, pos=None, weight=1, tag=0, info=""):
@@ -23,6 +39,17 @@ class NodeData(object):
         self.weight = weight
         self.tag = tag
         self.info = info
+
+    def __eq__(self, other):
+        if other is None:
+            return False
+        if type(other) is not type(self):
+            return False
+        if other.node_id != self.node_id:
+            return False
+        if other.pos != self.pos:
+            return False
+        return True
 
     def __repr__(self):
         return "node id: " + str(self.node_id) + ", pos: " + str(self.pos)
@@ -37,6 +64,40 @@ class DiGraph(GraphInterface):
         self._mc = 0
         self.nei_nodes_in = dict()
         self.nei_nodes_out = dict()
+
+    def __eq__(self, other):
+        if other is None:
+            return False
+        if type(other) is not type(self):
+            return False
+        if len(other.get_all_v()) != len(self.get_all_v()):
+            return False
+        nodes = other.get_all_v()
+        for node in self.v.values():
+            if nodes[node.node_id] != node:
+                return False
+            out_edges_other = other.all_out_edges_of_node(node.node_id)
+            out_edges_self = self.all_out_edges_of_node(node.node_id)
+            if len(out_edges_other) != len(out_edges_self):
+                return False
+            for dest in out_edges_self.keys():
+                if out_edges_other[dest] is None:
+                    return False
+                if out_edges_other[dest] != out_edges_self[dest]:
+                    return False
+            in_edges_other = other.all_in_edges_of_node(node.node_id)
+            in_edges_self = self.all_in_edges_of_node(node.node_id)
+            if len(in_edges_other) != len(in_edges_self):
+                return False
+            for src in in_edges_self.keys():
+                if in_edges_other[src] is None:
+                    return False
+                if in_edges_other[src] != in_edges_self[src]:
+                    return False
+        return True
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
     def v_size(self) -> int:
         """

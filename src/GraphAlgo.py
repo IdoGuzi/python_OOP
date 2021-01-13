@@ -21,40 +21,58 @@ class GraphAlgo(GraphAlgoInterface):
             with open(file_name, 'r') as f:
                 g = json.load(f)
             for n in g["Nodes"]:
-                self.graph.add_node(n["id"], n["pos"])
+                if n.get("pos") is not None:
+                    string = n["pos"]
+                    string_list = string.split(',')
+                    self.graph.add_node(n["id"], (float(string_list[0]), float(string_list[1]), float(string_list[2])))
+                else:
+                    self.graph.add_node(n["id"])
             for e in g["Edges"]:
                 self.graph.add_edge(e["src"], e["dest"], e["w"])
-        except:
+        except Exception as e:
+            print(e)
             return False
         return True
 
     def save_to_json(self, file_name: str):
         try:
+            json_graph = dict()
             Nodes = []
             Edges = []
-            for n in self.graph.get_all_v():
-                node = json.dumps({"id": n.id, "pos": n.pos})
+            for n in self.graph.get_all_v().values():
+                node = {"id": n.node_id, "pos": n.pos.to_string()}
                 Nodes.append(node)
-                out = self.graph.all_out_edges_of_node(n.id)
+                out = self.graph.all_out_edges_of_node(n.node_id)
                 for e in out.keys():
-                    edge = json.dumps({"src": n.id, "dest": e, "w": out[e]})
+                    edge = {"src": n.node_id, "dest": e, "w": out[e]}
                     Edges.append(edge)
-            with open(file_name, 'w') as f:
-                json.dump({"Nodes": Nodes, "Edges": Edges}, f)
-        except:
+            json_graph["Nodes"] = Nodes
+            json_graph["Edges"] = Edges
+            with open(file_name, 'w+') as file:
+                json.dump(json_graph, file, indent=4)
+        except Exception as e:
+            print(e)
             return False
         return True
 
     def connected_component(self, id1: int):
         if self.graph is None or self.graph.get_all_v()[id1] is None:
             return []
-        component = []
+        connected_component = []
+        strongly_connected_componect = []
         dist, parents = self.dijkstra(id1)
         nodes = self.graph.get_all_v()
         for node_id in dist.keys():
             if dist[node_id] is not math.inf:
-                component.append(nodes[node_id])
-        return component
+                connected_component.append(nodes[node_id])
+        g = self.get_graph()
+        self.graph = self.get_graph_transpose()
+        dist, parents = self.dijkstra(id1)
+        for node in connected_component:
+            if dist[node.node_id] is not math.inf :
+                strongly_connected_componect.append(node)
+        self.graph = g
+        return strongly_connected_componect
 
     def connected_components(self):
         seen = {}
@@ -66,7 +84,7 @@ class GraphAlgo(GraphAlgoInterface):
                 continue
             component = self.connected_component(n)
             for v in component:
-                seen[v.id] = True
+                seen[v.node_id] = True
             components.append(component)
         return components
 
@@ -107,3 +125,14 @@ class GraphAlgo(GraphAlgoInterface):
                         queue.put((dist[u_id], u_id))
             visited[v_id] = True
         return dist, parents
+
+    def get_graph_transpose(self):
+        g = DiGraph()
+        nodes = self.graph.get_all_v()
+        for key in nodes.keys():
+            g.add_node(key)
+        for key in nodes.keys():
+            out_edges = self.graph.all_out_edges_of_node(key)
+            for dest in out_edges.keys():
+                g.add_edge(dest, key, out_edges[dest])
+        return g
