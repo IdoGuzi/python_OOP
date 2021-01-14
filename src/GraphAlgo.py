@@ -4,6 +4,8 @@ from DiGraph import *
 from queue import PriorityQueue
 import math
 import json
+import random
+import matplotlib.pyplot as plt
 
 
 class GraphAlgo(GraphAlgoInterface):
@@ -98,6 +100,48 @@ class GraphAlgo(GraphAlgoInterface):
             node_id = parents.get(node_id)
             path.insert(0, node_id)
         return dist[id2], path
+
+    def plot_graph(self):
+        plt.figure()
+        plt.title("Graph")
+        plt.xlabel("x")
+        plt.ylabel("y")
+        max_x = 10
+        min_x = 0
+        max_y = 10
+        min_y = 0
+        for node in self.get_graph().get_all_v().values():
+            if node.pos.x == 0 and node.pos.y == 0:
+                node.pos.x = random.uniform(min_x, max_x)
+                if node.pos.x <(min_x+((max_x-min_x)/4)) or node.pos.x> max_x-((max_x-min_x)/4):
+                    node.pos.y = random.uniform(min_y, max_y)
+                else:
+                    down = bool(random.getrandbits(1))
+                    if down:
+                        node.pos.y = random.uniform(min_y, min_y+(max_y-min_y)/4)
+                    else:
+                        node.pos.y = random.uniform(max_y-(max_y-min_y)/4, max_y)
+            if node.pos.x > max_x:
+                max_x = node.pos.x + 1
+            if node.pos.x < min_x:
+                min_x = node.pos.x - 1
+            if node.pos.y > max_y:
+                max_y = node.pos.y + 1
+            if node.pos.y < min_y:
+                min_y = node.pos.y - 1
+        plt.axis([min_x, max_x, min_y, max_y])
+        nodes = self.graph.get_all_v()
+        for node in nodes.values():
+            plt.plot(node.pos.x, node.pos.y, 'ro')
+            plt.text(node.pos.x, node.pos.y, str(node.node_id))
+            edges = self.graph.all_out_edges_of_node(node.node_id)
+            for dest in edges.keys():
+                dest_node = nodes[dest]
+                dx = dest_node.pos.x-node.pos.x
+                dy = dest_node.pos.y-node.pos.y
+                plt.arrow(node.pos.x, node.pos.y, dx, dy, length_includes_head=True, head_width=0.15, width=0.001)
+                plt.text(node.pos.x+dx/3,node.pos.y+dy/3, "s="+str(node.node_id)+", d="+str(dest)+", w="+str(edges[dest]), fontsize=8)
+        plt.show()
 
     def dijkstra(self, src: int):
         parents = {}

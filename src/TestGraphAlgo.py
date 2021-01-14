@@ -128,6 +128,9 @@ class TestGraphAlgo(unittest.TestCase):
 
     def test_plot_graph(self):
         ga = GraphAlgo(self.graph_factory(1))
+        ga.plot_graph()
+        ga = GraphAlgo(self.graph_factory(2))
+        ga.plot_graph()
 
     def graph_factory(self, number: int):
         g = DiGraph()
