@@ -1,3 +1,5 @@
+from typing import List
+
 from GraphAlgoInterface import GraphAlgoInterface
 from DiGraph import *
 
@@ -14,11 +16,20 @@ class GraphAlgo(GraphAlgoInterface):
         if g is None:
             self.graph = DiGraph()
     
-    def get_graph(self):
+    def get_graph(self) -> GraphInterface:
+        """
+        @return: the graph this object holds.
+        """
         return self.graph
 
-    def load_from_json(self, file_name: str):
+    def load_from_json(self, file_name: str) -> bool:
+        """
+        loads a graph from a file in json format.
+        @param file_name: name of the file (relative and absolute path).
+        @return: true for success, false for failure and keeps the old graph.
+        """
         try:
+            old = self.graph
             self.graph = DiGraph()
             with open(file_name, 'r') as f:
                 g = json.load(f)
@@ -33,10 +44,16 @@ class GraphAlgo(GraphAlgoInterface):
                 self.graph.add_edge(e["src"], e["dest"], e["w"])
         except Exception as e:
             print(e)
+            self.graph = old
             return False
         return True
 
-    def save_to_json(self, file_name: str):
+    def save_to_json(self, file_name: str) -> bool:
+        """
+        save the graph in this object to a file in json format.
+        @param file_name: the name of the file.
+        @return: true for success, false for failure
+        """
         try:
             json_graph = dict()
             Nodes = []
@@ -57,7 +74,12 @@ class GraphAlgo(GraphAlgoInterface):
             return False
         return True
 
-    def connected_component(self, id1: int):
+    def connected_component(self, id1: int) -> list:
+        """
+        finds the Strongly Connected Component of the node id1 in the graph.
+        @param id1: id of the node to find his SCC
+        @return: list of the node in the SCC, empty list if graph is None or id1 is not in the graph.
+        """
         if self.graph is None or self.graph.get_all_v()[id1] is None:
             return []
         connected_component = []
@@ -76,7 +98,11 @@ class GraphAlgo(GraphAlgoInterface):
         self.graph = g
         return strongly_connected_componect
 
-    def connected_components(self):
+    def connected_components(self) -> List[list]:
+        """
+        finds all the Strongly Connected Component in the graph.
+        @return: list of all the SCC, empty list if graph is None.
+        """
         seen = {}
         components = []
         for n in self.graph.get_all_v().keys():
@@ -90,7 +116,14 @@ class GraphAlgo(GraphAlgoInterface):
             components.append(component)
         return components
 
-    def shortest_path(self, id1: int, id2: int):
+    def shortest_path(self, id1: int, id2: int) -> (float, list):
+        """
+        find the shortest path between 2 nodes in the graph.
+        @param id1: id of the src node.
+        @param id2: id of the dst node.
+        @return: distance of the path, list of the node ids in the path,
+        if path not exist distance is infinity and the list will be empty.
+        """
         dist, parents = self.dijkstra(id1)
         path = list()
         path.insert(0, id2)
@@ -101,7 +134,10 @@ class GraphAlgo(GraphAlgoInterface):
             path.insert(0, node_id)
         return dist[id2], path
 
-    def plot_graph(self):
+    def plot_graph(self) -> None:
+        """
+        drawing the graph with matplotlib.
+        """
         plt.figure()
         plt.title("Graph")
         plt.xlabel("x")
@@ -145,8 +181,14 @@ class GraphAlgo(GraphAlgoInterface):
                 plt.arrow(node.pos.x, node.pos.y, dx, dy, length_includes_head=True, head_width=0.15, width=0.001)
                 plt.text(node.pos.x+dx/3,node.pos.y+dy/3, "s="+str(node.node_id)+", d="+str(dest)+", w="+str(edges[dest]), fontsize=8)
         plt.show()
+        return None
 
     def dijkstra(self, src: int):
+        """
+        perform dijksta algorithm on the graph from node src.
+        @param src: id of the node.
+        @return: dictionary of node id such that the value is the node id who found the key.
+        """
         parents = {}
         dist = {}
         visited = {}
@@ -174,6 +216,10 @@ class GraphAlgo(GraphAlgoInterface):
         return dist, parents
 
     def get_graph_transpose(self):
+        """
+        taking the graph in this object and create the graph^T (transpose).
+        @return: the transpose graph.
+        """
         g = DiGraph()
         nodes = self.graph.get_all_v()
         for key in nodes.keys():

@@ -204,18 +204,20 @@ class DiGraph(GraphInterface):
          """
         if node_id not in self.v:
             return False
-        for key in self.nei_nodes_in.keys():
-            if node_id in self.nei_nodes_in[key]:
-                self.remove_edge(node_id, key)
+        in_edges = self.all_in_edges_of_node(node_id)
+        for key in in_edges.keys():
+            del self.nei_nodes_out[key][node_id]
+        out_edges = self.all_out_edges_of_node(node_id)
+        for key in out_edges.keys():
+            del self.nei_nodes_in[key][node_id]
 
         del self.nei_nodes_out[node_id]
+        del self.nei_nodes_in[node_id]
         del self.v[node_id]
 
         self._mc += 1
         self._nodeSize -= 1
         return True
-
-
 
     def remove_edge(self, node_id1: int, node_id2: int) -> bool:
         """
