@@ -106,21 +106,24 @@ class GraphAlgo(GraphAlgoInterface):
         plt.title("Graph")
         plt.xlabel("x")
         plt.ylabel("y")
-        max_x = 10
+        max_x = len(self.get_graph().get_all_v())*2
         min_x = 0
-        max_y = 10
+        max_y = len(self.get_graph().get_all_v())*2
         min_y = 0
+        on_x = dict()
+        on_y = dict()
         for node in self.get_graph().get_all_v().values():
             if node.pos.x == 0 and node.pos.y == 0:
-                node.pos.x = random.uniform(min_x, max_x)
-                if node.pos.x <(min_x+((max_x-min_x)/4)) or node.pos.x> max_x-((max_x-min_x)/4):
-                    node.pos.y = random.uniform(min_y, max_y)
-                else:
-                    down = bool(random.getrandbits(1))
-                    if down:
-                        node.pos.y = random.uniform(min_y, min_y+(max_y-min_y)/4)
-                    else:
-                        node.pos.y = random.uniform(max_y-(max_y-min_y)/4, max_y)
+                x = random.uniform(min_x, max_x)
+                y = random.uniform(min_y, max_y)
+                while on_x.get(x) is not None:
+                    x = random.uniform(min_x, max_x)
+                node.pos.x = x
+                on_x[x] = node.node_id
+                while on_y.get(y) is not None:
+                    y = random.uniform(min_y, max_y)
+                node.pos.y = y
+                on_y[y] = node.node_id
             if node.pos.x > max_x:
                 max_x = node.pos.x + 1
             if node.pos.x < min_x:
