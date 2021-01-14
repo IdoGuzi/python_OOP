@@ -6,8 +6,9 @@ This mission was supposed to teach us to develop OOP in Python for the first tim
 Among the other tasks, we had to compare our code in JAVA, PYTHON, NETWORKX and measure runtimes. The following is a general result:
 See detailed plotting in WIKI
 
-## Compartion
+## Comparison
 ![](https://github.com/IdoGuzi/python_OOP/blob/master/GraphsPic/pieOveraLL.png)
+For more comparison resaults go to our  [wiki ](https://github.com/IdoGuzi/python_OOP/wiki) and you will find a lot more info and plots.
 
 ## How To Use
 
