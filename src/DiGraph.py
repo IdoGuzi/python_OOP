@@ -99,6 +99,11 @@ class DiGraph(GraphInterface):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def __repr__(self):
+        nodes = "nodes: " + str(self.v) + '\n'
+        edges = "edges: " + str(self.nei_nodes_out) + '\n'
+        return nodes + edges
+
     def v_size(self) -> int:
         """
         Returns the number of vertices in this graph
